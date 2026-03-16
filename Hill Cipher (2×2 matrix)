@@ -1,0 +1,77 @@
+import java.util.Scanner;
+
+public class HillCipher {
+
+    static int[][] keyMatrix = {{3, 3}, {2, 5}}; // 2x2 key matrix
+
+    static String encrypt(String text) {
+        text = text.toUpperCase();
+        if (text.length() % 2 != 0) text += "X"; // padding
+
+        StringBuilder cipherText = new StringBuilder();
+        for (int i = 0; i < text.length(); i += 2) {
+            int x1 = text.charAt(i) - 'A';
+            int x2 = text.charAt(i + 1) - 'A';
+            int y1 = (keyMatrix[0][0] * x1 + keyMatrix[0][1] * x2) % 26;
+            int y2 = (keyMatrix[1][0] * x1 + keyMatrix[1][1] * x2) % 26;
+            cipherText.append((char) (y1 + 'A'));
+            cipherText.append((char) (y2 + 'A'));
+        }
+        return cipherText.toString();
+    }
+
+    static int modInverse(int a, int m) {
+        a = a % m;
+        for (int x = 1; x < m; x++)
+            if ((a * x) % m == 1)
+                return x;
+        return 1;
+    }
+
+    static String decrypt(String text) {
+        int det = keyMatrix[0][0] * keyMatrix[1][1] - keyMatrix[0][1] * keyMatrix[1][0];
+        det = ((det % 26) + 26) % 26;
+        int detInv = modInverse(det, 26);
+
+        int[][] invKey = new int[2][2];
+        invKey[0][0] = (keyMatrix[1][1] * detInv) % 26;
+        invKey[0][1] = ((-keyMatrix[0][1] + 26) * detInv) % 26;
+        invKey[1][0] = ((-keyMatrix[1][0] + 26) * detInv) % 26;
+        invKey[1][1] = (keyMatrix[0][0] * detInv) % 26;
+
+        StringBuilder plainText = new StringBuilder();
+        for (int i = 0; i < text.length(); i += 2) {
+            int y1 = text.charAt(i) - 'A';
+            int y2 = text.charAt(i + 1) - 'A';
+            int x1 = (invKey[0][0] * y1 + invKey[0][1] * y2) % 26;
+            int x2 = (invKey[1][0] * y1 + invKey[1][1] * y2) % 26;
+            plainText.append((char) (x1 + 'A'));
+            plainText.append((char) (x2 + 'A'));
+        }
+        return plainText.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter text (letters only): ");
+        String text = sc.nextLine();
+
+        String encrypted = encrypt(text);
+        String decrypted = decrypt(encrypted);
+
+        System.out.println("Encrypted Text: " + encrypted);
+        System.out.println("Decrypted Text: " + decrypted);
+        sc.close();
+    }
+}
+
+
+
+
+
+
+
+Input & Output:
+Enter text (letters only): HELLO
+Encrypted Text: EHNLPX
+Decrypted Text: HELLOX
