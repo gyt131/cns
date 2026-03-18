@@ -1,0 +1,131 @@
+import java.security.*;
+import javax.crypto.Cipher;
+import java.util.Base64;
+
+public class RSAExample {
+
+    public static void main(String[] args) throws Exception {
+
+        // Step 1: Generate Key Pair
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+        keyPairGen.initialize(2048);   // 2048-bit key (secure)
+        KeyPair pair = keyPairGen.generateKeyPair();
+
+        PublicKey publicKey = pair.getPublic();
+        PrivateKey privateKey = pair.getPrivate();
+
+        System.out.println("Public Key: " + Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+        System.out.println("Private Key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+
+        // Step 2: Plain Text
+        String message = "Hello RSA";
+        System.out.println("Original Message: " + message);
+
+        // Step 3: Encrypt using Public Key
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+
+        byte[] encryptedBytes = cipher.doFinal(message.getBytes());
+        String encryptedText = Base64.getEncoder().encodeToString(encryptedBytes);
+        System.out.println("Encrypted Message: " + encryptedText);
+
+        // Step 4: Decrypt using Private Key
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+        String decryptedText = new String(decryptedBytes);
+        System.out.println("Decrypted Message: " + decryptedText);
+    }
+}
+
+
+
+
+
+
+Input & output:
+
+Original Message: Hello RSA
+Encrypted Message: hY78KJH76....
+Decrypted Message: Hello RSA
+
+
+
+
+import java.math.BigInteger;
+import java.util.Scanner;
+
+public class ManualRSAUserInput {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // Step 1: Take p and q from user
+        System.out.print("Enter prime number p: ");
+        BigInteger p = sc.nextBigInteger();
+
+        System.out.print("Enter prime number q: ");
+        BigInteger q = sc.nextBigInteger();
+
+        // Step 2: Compute n = p * q
+        BigInteger n = p.multiply(q);
+
+        // Step 3: Compute phi(n) = (p-1)(q-1)
+        BigInteger phi = (p.subtract(BigInteger.ONE))
+                .multiply(q.subtract(BigInteger.ONE));
+
+        // Step 4: Choose e (1 < e < phi and gcd(e,phi)=1)
+        BigInteger e = new BigInteger("2");
+
+        while (e.compareTo(phi) < 0) {
+            if (e.gcd(phi).equals(BigInteger.ONE)) {
+                break;
+            }
+            e = e.add(BigInteger.ONE);
+        }
+
+        // Step 5: Compute d = e^-1 mod phi
+        BigInteger d = e.modInverse(phi);
+
+        System.out.println("\nPublic Key (e, n): (" + e + ", " + n + ")");
+        System.out.println("Private Key (d, n): (" + d + ", " + n + ")");
+
+        // Step 6: Take message
+        System.out.print("\nEnter numeric message (less than " + n + "): ");
+        BigInteger message = sc.nextBigInteger();
+
+        if (message.compareTo(n) >= 0) {
+            System.out.println("Message must be less than n.");
+            return;
+        }
+
+        // Step 7: Encryption
+        BigInteger cipherText = message.modPow(e, n);
+        System.out.println("\nEncrypted Message: " + cipherText);
+
+        // Step 8: Decryption
+        BigInteger decryptedMessage = cipherText.modPow(d, n);
+        System.out.println("Decrypted Message: " + decryptedMessage);
+
+        sc.close();
+    }
+}
+
+
+
+
+
+Input & output:
+1)
+Enter prime number p: 61
+Enter prime number q: 53
+
+Public Key (e, n): (7, 3233)
+Private Key (d, n): (1783, 3233)
+
+Enter numeric message (less than 3233): 65
+
+Encrypted Message: 1317
+Decrypted Message: 65
+
