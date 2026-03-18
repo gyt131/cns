@@ -1,0 +1,83 @@
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+import java.util.Scanner;
+
+public class BlowfishUserInput {
+
+    // Method to perform Blowfish Encryption
+    public static String encrypt(String plaintext, String key) throws Exception {
+
+        // Convert user key into Blowfish secret key
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "Blowfish");
+
+        // Create Blowfish cipher object
+        Cipher cipher = Cipher.getInstance("Blowfish");
+
+        // Initialize cipher in ENCRYPT mode
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+        // Encrypt the plaintext
+        byte[] encryptedBytes = cipher.doFinal(plaintext.getBytes());
+
+        // Convert encrypted bytes to Base64 string
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+    // Method to perform Blowfish Decryption
+    public static String decrypt(String ciphertext, String key) throws Exception {
+
+        // Convert user key into Blowfish secret key
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "Blowfish");
+
+        // Create Blowfish cipher object
+        Cipher cipher = Cipher.getInstance("Blowfish");
+
+        // Initialize cipher in DECRYPT mode
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+
+        // Decode Base64 and decrypt ciphertext
+        byte[] decryptedBytes =
+                cipher.doFinal(Base64.getDecoder().decode(ciphertext));
+
+        // Convert decrypted bytes to plain text
+        return new String(decryptedBytes);
+    }
+
+    public static void main(String[] args) {
+
+        try {
+            Scanner sc = new Scanner(System.in);
+
+    
+            System.out.print("Enter Plain Text: ");        // Read plaintext from user
+            String plaintext = sc.nextLine();
+
+           System.out.print("Enter Secret Key: ");	     // Read secret key from user
+            String key = sc.nextLine();
+
+            String encryptedText = encrypt(plaintext, key);         // Encrypt the plain text
+	System.out.println("\nEncrypted Text: " + encryptedText);
+
+          	 String decryptedText = decrypt(encryptedText, key);        // Decrypt the cipher text
+            System.out.println("Decrypted Text: " + decryptedText);
+
+            sc.close(); // Close scanner
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+
+
+
+
+
+
+Input &Output:
+Enter Plain Text: this is Cyptograpgy and Network Security lab Blowfish
+Enter Secret Key: Feistel structure 
+
+Encrypted Text: rbrMqKWI6THrqxYQ4UEfVAT8DB77vGxWRrM5J+noZh5xQOJBCtxrzyVCB0I+9iX1NNuLXOJG3g=
+Decrypted Text: this is Cyptograpgy and Network Security lab Blowfish
